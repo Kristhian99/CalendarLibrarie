@@ -94,8 +94,8 @@ const App: () => Node = () => {
             style={[
               {
                 width: '100%',
-                backgroundColor: 'pink',
-                opacity: 0.5,
+                backgroundColor: '#F3F3F3',
+               
                 bottom: 0,
                 position: 'absolute',
               },
