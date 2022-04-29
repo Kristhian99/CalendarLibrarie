@@ -1,15 +1,6 @@
-import React, {useRef, useMemo, useEffect, useState} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import {ScrollView, Text, View, TouchableOpacity, FlatList} from 'react-native';
 import Animated, {
   useSharedValue,
   withSpring,
@@ -23,9 +14,7 @@ import {
   RectButton,
 } from 'react-native-gesture-handler';
 
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-
-import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
+import GestureRecognizer from 'react-native-swipe-gestures';
 
 import memoize from 'memoize-one';
 
@@ -40,6 +29,22 @@ class Calendar extends React.PureComponent {
     this.FirstDay = new Date();
     this.weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     this.nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    this.months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+
+    this.weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   }
   state = {
     currentDate: new Date(),
@@ -72,7 +77,6 @@ class Calendar extends React.PureComponent {
         }
       }
     }
-
     return matrix;
   });
 
@@ -89,8 +93,16 @@ class Calendar extends React.PureComponent {
   }
 
   render() {
-    console.log('geerate calendar');
+    console.log('geerate calendar', this.props.month);
     const matrix = this.generateMatrix(this.props.year, this.props.month);
+
+    const renderWeekdays = this.weekDays.map((day, INDEX) => {
+      return (
+        <View style={{flex: 1}} key={`${INDEX}`}>
+          <Text style={{textAlign: 'center'}}>{day}</Text>
+        </View>
+      );
+    });
 
     const rows = matrix.map((row, rowIndex) => {
       var rowItems = row.map((w, colIndex) => {
@@ -151,7 +163,28 @@ class Calendar extends React.PureComponent {
       );
     });
 
-    return <View>{rows}</View>;
+    return (
+      <View>
+        <View
+          style={{
+            flexDirection: 'row',
+            height: hp(5),
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text
+            style={{
+              textAlign: 'center',
+              fontFamily: 'NoirPro-Regular',
+              fontSize: hp(2.2),
+            }}>
+            {this.months[this.props.month]} {this.props.year}
+          </Text>
+        </View>
+        <View style={{flexDirection: 'row'}}>{renderWeekdays}</View>
+        {rows}
+      </View>
+    );
   }
 }
 
@@ -214,7 +247,7 @@ class WeekCalendar extends React.PureComponent {
   }
   state = {
     month: new Date().getMonth(),
-    year: new Date().getFullYear()
+    year: new Date().getFullYear(),
   };
 
   _onPress = item => {
@@ -888,6 +921,32 @@ const AnimatedTest = ({y2}) => {
     });
   }
 
+  const [testingObservable, setTestable] = useState({});
+
+  const generateCalendarsList = () => {
+    var date = new Date()
+    var list= [];
+    for (let i = 0; i <12;i++){
+      list.push({year:date.getFullYear(), month:date.getMonth()})
+      date.setMonth(date.getMonth() + 1);
+    }
+    return list
+  };
+
+  const testingListCalendar = useMemo(generateCalendarsList,[HeightCalendar])
+  
+
+  const renderItem = ({item}) => (
+    <View style={{flex: 1, width: wp(100)}}>
+      <Calendar
+        year={item.year}
+        month={item.month}
+        markDays={item.month === 6 ? testingObservable : markDays}
+        setDays={setDays}
+      />
+    </View>
+  );
+
   return (
     <View style={{flex: 1, width: '100%'}}>
       <GestureHandlerRootView style={{flex: 1, width: '100%'}}>
@@ -917,29 +976,22 @@ const AnimatedTest = ({y2}) => {
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                   }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      height: hp(5),
-                      alignItems: 'center',
-                    }}>
-                    <Text
-                      style={{
-                        textAlign: 'center',
-                        fontFamily: 'NoirPro-Regular',
-                        fontSize: hp(2.2),
-                      }}>
-                      {months[activeDate.getMonth()]} {activeDate.getFullYear()}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row'}}>{renderWeekdays}</View>
                   <View style={{flex: 1, width: '100%'}}>
-                    <Calendar
+                    <FlatList
+                      data={testingListCalendar}
+                      renderItem={renderItem}
+                      keyExtractor={item => {`${item.month}-${item.year}`}}
+                      horizontal={true}
+                      snapToAlignment="start"
+                      decelerationRate={'fast'}
+                      snapToInterval={wp(100)}
+                    />
+                    {/*  <Calendar
                       year={activeDate.getFullYear()}
                       month={activeDate.getMonth()}
                       markDays={markDays}
                       setDays={setDays}
-                    />
+                    /> */}
                   </View>
                 </View>
               </GestureRecognizer>
