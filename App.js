@@ -39,7 +39,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import Test from './tes1';
+import Calendar from './calendar';
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -104,7 +104,7 @@ const App: () => Node = () => {
             ]}></Animated.View>
         </View>
 
-        <Test y2={y2} numberofMonths={5} numberOfDays={100}>
+        <Calendar y2={y2} numberofMonths={5} numberOfDays={100}>
           <View
             style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
             <TouchableOpacity
@@ -120,7 +120,7 @@ const App: () => Node = () => {
             </TouchableOpacity>
             <Text>working</Text>
           </View>
-        </Test>
+        </Calendar>
       </View>
     </SafeAreaView>
   );
