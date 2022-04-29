@@ -11,10 +11,8 @@ import Animated, {
 import {
   PanGestureHandler,
   GestureHandlerRootView,
-  RectButton,
 } from 'react-native-gesture-handler';
-
-import GestureRecognizer from 'react-native-swipe-gestures';
+import _ from 'lodash';
 
 import memoize from 'memoize-one';
 
@@ -22,6 +20,41 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+/////////////////                                     //////////////////////
+/////////////////  ///////////////////////////////// //////////////////////
+/////////////////  //////////////////////////////// ////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////  /////////////////////////////////////////////////////////
+/////////////////   ////////////////////////////////////////////////////////
+/////////////////                                  /////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 class Calendar extends React.PureComponent {
   constructor(props) {
@@ -92,6 +125,14 @@ class Calendar extends React.PureComponent {
     this.props.setDays(newmarkDates);
   }
 
+  onPressDay2(day) {
+    this.props.setAcualDay({
+      year: this.props.year,
+      month: this.props.month,
+      day: day,
+    });
+  }
+
   render() {
     console.log('geerate calendar', this.props.month);
     const matrix = this.generateMatrix(this.props.year, this.props.month);
@@ -118,14 +159,18 @@ class Calendar extends React.PureComponent {
               justifyContent: 'center',
             }}>
             <TouchableOpacity
-              onPress={() => this.onPressDay(w)}
+              onPress={() => this.onPressDay2(w)}
               style={{
                 height: hp(6),
                 width: hp(6),
                 borderRadius: hp(6),
                 backgroundColor:
-                  `${this.props.year}-${this.props.month}-${w}` in
-                  this.props.markDays
+                  this.props.actualDay.year === this.props.year &&
+                  this.props.actualDay.month === this.props.month &&
+                  this.props.actualDay.day === w
+                    ? 'green'
+                    : `${this.props.year}-${this.props.month}-${w}` in
+                      this.props.markDays
                     ? 'red'
                     : '#E6E6E6',
                 alignItems: 'center',
@@ -261,6 +306,14 @@ class WeekCalendar extends React.PureComponent {
     console.log(newmarkDates);
   };
 
+  _onPress2 = item => {
+    this.props.setAcualDay({
+      year: item.year,
+      month: item.month,
+      day: item.day,
+    });
+  };
+
   generateSnapPoinst = memoize(() => {
     console.log('snap Poinst');
     const space = wp(15);
@@ -292,7 +345,6 @@ class WeekCalendar extends React.PureComponent {
   }
 
   render() {
-    const SnapPoints = this.generateSnapPoinst();
     console.log('render Pure componet alv compa');
     var rowsWeeks = [];
     rowsWeeks = this.props.matrixWeek.map((day, i) => {
@@ -317,14 +369,19 @@ class WeekCalendar extends React.PureComponent {
               justifyContent: 'center',
             }}>
             <TouchableOpacity
-              onPress={() => this._onPress(day)}
+              onPress={() => this._onPress2(day)}
               style={{
                 height: hp(6),
                 alignSelf: 'center',
                 width: hp(6),
                 borderRadius: hp(6),
                 backgroundColor:
-                  `${day.year}-${day.month}-${day.day}` in this.props.markDays
+                  this.props.actualDay.year === day.year &&
+                  this.props.actualDay.month === day.month &&
+                  this.props.actualDay.day === day.day
+                    ? 'green'
+                    : `${day.year}-${day.month}-${day.day}` in
+                      this.props.markDays
                     ? 'red'
                     : '#E6E6E6',
                 alignItems: 'center',
@@ -397,7 +454,7 @@ class WeekCalendar extends React.PureComponent {
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-///////////////////////////// ////////////////////////////////////////////
+////////////////////////////  ////////////////////////////////////////////
 //////////////////////////  ///  /////////////////////////////////////////
 ////////////////////////  //////  ////////////////////////////////////////
 //////////////////////  /////////  ///////////////////////////////////////
@@ -427,7 +484,7 @@ class WeekCalendar extends React.PureComponent {
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-const AnimatedTest = ({y2}) => {
+const CalendarAimated = ({y2, children, numberOfDays, numberofMonths}) => {
   //
 
   //
@@ -458,44 +515,15 @@ const AnimatedTest = ({y2}) => {
   const x = useSharedValue(0);
   const y = useSharedValue(-HeightCalendar * 0.6);
   const y1 = useSharedValue(-HeightCalendar * 0.6);
-  const y3 = useSharedValue(100);
   const pointer = useSharedValue(-HeightCalendar * 0.6);
-
-  const [state, setState] = useState(false);
-
   const [markDays, setDays] = useState({});
-
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  const changeState = () => {
-    setState(!state);
-  };
 
   const nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-  const [activeDate, setActiveDate] = useState(new Date());
-
-  const renderWeekdays = weekDays.map((day, INDEX) => {
-    return (
-      <View style={{flex: 1}} key={`${INDEX}`}>
-        <Text style={{textAlign: 'center'}}>{day}</Text>
-      </View>
-    );
+  const [actualDay, setAcualDay] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+    day: new Date().getDate(),
   });
 
   ////////////////////////////////////////////////////
@@ -543,38 +571,6 @@ const AnimatedTest = ({y2}) => {
   ////////////////////////////////////////////////////
 
   /////////////////////Generate Every Month Matix ////////////////
-
-  function generateMatrix() {
-    var matrix = [];
-
-    var year = activeDate.getFullYear();
-    var month = activeDate.getMonth();
-    var firstDay = new Date(year, month, 1).getDay();
-
-    var maxDays = nDays[month];
-    if (month == 1) {
-      if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
-        maxDays += 1;
-      }
-    }
-    var counter = 1;
-
-    for (var row = 0; row < 7; row++) {
-      matrix[row] = [];
-      for (var col = 0; col < 7; col++) {
-        matrix[row][col] = -1;
-        if (row == 0 && col >= firstDay) {
-          matrix[row][col] = counter++;
-        } else if (row > 0 && counter <= maxDays) {
-          matrix[row][col] = counter++;
-        }
-      }
-    }
-
-    return matrix;
-  }
-
-  var matrix = useMemo(generateMatrix, [activeDate]);
 
   ////////////////////////////////////////////////////
 
@@ -641,7 +637,7 @@ const AnimatedTest = ({y2}) => {
 
     //Variable to determinate how many days Render will generate
 
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < numberOfDays; i++) {
       if (count >= nDays[month]) {
         count = 1;
         month = month + 1;
@@ -819,18 +815,8 @@ const AnimatedTest = ({y2}) => {
         pointer.value = -HeightCalendar * 0.6;
         //setState(false)
       }
-      runOnJS(changeState)();
-      console.log(y.value);
     },
   });
-
-  useEffect(() => {
-    /* if (state) {
-      scroll.current.scrollTo({y: hp(53)});
-    } else {
-      scroll.current.scrollTo({y: 0});
-    } */
-  }, [state]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {transform: [{translateY: y.value}]};
@@ -892,60 +878,46 @@ const AnimatedTest = ({y2}) => {
 
   /////////////////////COntrol the INteractions ////////
 
-  _onPress = item => {
-    const newmarkDates = {...markDays};
-    const month = activeDate.getMonth();
-    const year = activeDate.getFullYear();
-    if (`${year}-${month}-${item}` in markDays) {
-      delete newmarkDates[`${year}-${month}-${item}`];
-    } else {
-      newmarkDates[`${year}-${month}-${item}`] = item;
-    }
-    setDays(newmarkDates);
-    console.log(newmarkDates);
-  };
-
-  function onSwipeLeft(gestureState) {
-    setActiveDate(() => {
-      const date = new Date(activeDate);
-      date.setMonth(activeDate.getMonth() + 1);
-      return date;
-    });
-  }
-
-  function onSwipeRight(gestureState) {
-    setActiveDate(() => {
-      const date = new Date(activeDate);
-      date.setMonth(activeDate.getMonth() - 1);
-      return date;
-    });
-  }
-
-  const [testingObservable, setTestable] = useState({});
-
   const generateCalendarsList = () => {
-    var date = new Date()
-    var list= [];
-    for (let i = 0; i <12;i++){
-      list.push({year:date.getFullYear(), month:date.getMonth()})
+    var m_y = new Date();
+    var date = new Date(m_y.getFullYear(), m_y.getMonth(), 1);
+    var list = [];
+    for (let i = 0; i < numberofMonths; i++) {
+      list.push({year: date.getFullYear(), month: date.getMonth()});
       date.setMonth(date.getMonth() + 1);
     }
-    return list
+    return list;
   };
 
-  const testingListCalendar = useMemo(generateCalendarsList,[HeightCalendar])
-  
+  const testingListCalendar = useMemo(generateCalendarsList, [HeightCalendar]);
 
-  const renderItem = ({item}) => (
-    <View style={{flex: 1, width: wp(100)}}>
-      <Calendar
-        year={item.year}
-        month={item.month}
-        markDays={item.month === 6 ? testingObservable : markDays}
-        setDays={setDays}
-      />
-    </View>
-  );
+  const hook = useMemo(() => {
+    return {year: 3000, month: 13, day: 0};
+  }, [HeightCalendar]);
+
+  const renderItem = ({item, index}) => {
+    return (
+      <View style={{flex: 1, width: wp(100)}} key={index}>
+        <Calendar
+          year={item.year}
+          month={item.month}
+          markDays={markDays}
+          setDays={setDays}
+          isCurrentDay={
+            item.year === actualDay.year && item.month === actualDay.month
+              ? true
+              : false
+          }
+          actualDay={
+            item.year === actualDay.year && item.month === actualDay.month
+              ? actualDay
+              : hook
+          }
+          setAcualDay={setAcualDay}
+        />
+      </View>
+    );
+  };
 
   return (
     <View style={{flex: 1, width: '100%'}}>
@@ -966,35 +938,28 @@ const AnimatedTest = ({y2}) => {
                 },
                 animatedStyle1,
               ]}>
-              <GestureRecognizer
-                onSwipeLeft={() => onSwipeLeft()}
-                onSwipeRight={() => onSwipeRight()}>
-                <View
-                  style={{
-                    height: hp(48),
-                    backgroundColor: '#F3F3F3',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  }}>
-                  <View style={{flex: 1, width: '100%'}}>
-                    <FlatList
-                      data={testingListCalendar}
-                      renderItem={renderItem}
-                      keyExtractor={item => {`${item.month}-${item.year}`}}
-                      horizontal={true}
-                      snapToAlignment="start"
-                      decelerationRate={'fast'}
-                      snapToInterval={wp(100)}
-                    />
-                    {/*  <Calendar
-                      year={activeDate.getFullYear()}
-                      month={activeDate.getMonth()}
-                      markDays={markDays}
-                      setDays={setDays}
-                    /> */}
-                  </View>
+              <View
+                style={{
+                  height: hp(48),
+                  backgroundColor: '#F3F3F3',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}>
+                <View style={{flex: 1, width: '100%'}}>
+                  <FlatList
+                    data={testingListCalendar}
+                    renderItem={renderItem}
+                    initialNumToRender={6}
+                    keyExtractor={item => {
+                      `${item.month}-${item.year}`;
+                    }}
+                    horizontal={true}
+                    snapToAlignment="start"
+                    decelerationRate={'fast'}
+                    snapToInterval={wp(100)}
+                  />
                 </View>
-              </GestureRecognizer>
+              </View>
             </Animated.View>
 
             <Animated.View
@@ -1021,6 +986,8 @@ const AnimatedTest = ({y2}) => {
                   setDays={setDays}
                   startPoint={startPoint}
                   SnapPoints={SnapPoints}
+                  actualDay={actualDay}
+                  setAcualDay={setAcualDay}
                 />
               </View>
             </Animated.View>
@@ -1050,24 +1017,14 @@ const AnimatedTest = ({y2}) => {
             },
             animatedStyle2,
           ]}>
-          <View
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-            <TouchableOpacity
-              style={{
-                height: hp(10),
-                width: hp(10),
-                backgroundColor: 'yellow',
-              }}>
-              <Text>TouchableOpacity</Text>
-            </TouchableOpacity>
-          </View>
+          {children}
         </Animated.View>
       </GestureHandlerRootView>
     </View>
   );
 };
 
-class Test extends React.PureComponent {
+class CalendarComponet extends React.PureComponent {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
@@ -1080,69 +1037,15 @@ class Test extends React.PureComponent {
   render() {
     return (
       <View style={{backgroundColor: 'blue', flex: 1}}>
-        <AnimatedTest y2={this.props.y2} />
+        <CalendarAimated
+          y2={this.props.y2}
+          numberOfDays={this.props.numberOfDays}
+          numberofMonths={this.props.numberofMonths}>
+          {this.props.children}
+        </CalendarAimated>
       </View>
     );
   }
 }
 
-export default Test;
-
-{
-  /*     <ScrollView
-            ref={scroll}
-            scrollEnabled={false}
-            style={{height: hp(53), width: '100%'}}>
-            <View style={{height: hp(29), backgroundColor: 'red'}}></View>
-            <View
-              style={{
-                height: hp(20),
-                width: '100%',
-                backgroundColor: '#F3F3F3',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-              }}>
-              <WeekCalendar
-                matrixWeek={matrixWeek}
-                markDays={markDays}
-                setDays={setDays}
-              />
-            </View>
-            <GestureRecognizer
-              onSwipeLeft={() => onSwipeLeft()}
-              onSwipeRight={() => onSwipeRight()}>
-              <View
-                style={{
-                  height: hp(48),
-                  backgroundColor: 'white',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    height: hp(5),
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      textAlign: 'center',
-                      fontFamily: 'NoirPro-Regular',
-                      fontSize: hp(2.2),
-                    }}>
-                    {months[activeDate.getMonth()]} {activeDate.getFullYear()}
-                  </Text>
-                </View>
-                <View style={{flexDirection: 'row'}}>{renderWeekdays}</View>
-                <View style={{flex: 1, width: '100%'}}>
-                  <Calendar
-                    year={activeDate.getFullYear()}
-                    month={activeDate.getMonth()}
-                    markDays={markDays}
-                    setDays={setDays}
-                  />
-                </View>
-              </View>
-            </GestureRecognizer>
-          </ScrollView> */
-}
+export default CalendarComponet;

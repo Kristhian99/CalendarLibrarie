@@ -16,6 +16,7 @@ import {
   Text,
   useColorScheme,
   View,
+  TouchableOpacity,
 } from 'react-native';
 
 import {
@@ -95,7 +96,7 @@ const App: () => Node = () => {
               {
                 width: '100%',
                 backgroundColor: '#F3F3F3',
-               
+
                 bottom: 0,
                 position: 'absolute',
               },
@@ -103,7 +104,23 @@ const App: () => Node = () => {
             ]}></Animated.View>
         </View>
 
-        <Test y2={y2} />
+        <Test y2={y2} numberofMonths={5} numberOfDays={100}>
+          <View
+            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <TouchableOpacity
+              onPress={() => {
+                console.log(_.isEqual({}, {}));
+              }}
+              style={{
+                height: hp(10),
+                width: hp(10),
+                backgroundColor: 'yellow',
+              }}>
+              <Text>TouchableOpacity</Text>
+            </TouchableOpacity>
+            <Text>working</Text>
+          </View>
+        </Test>
       </View>
     </SafeAreaView>
   );
